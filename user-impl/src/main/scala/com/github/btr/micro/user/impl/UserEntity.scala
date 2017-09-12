@@ -63,12 +63,21 @@ class UserEntity extends PersistentEntity
 		//持久化更新事件回复完成
 		case (cmd: Update, ctx, _) => ctx.thenPersist(Updated(cmd))(_ => ctx.reply(Done))
 	}
+	//处理删除命令
+	.onCommand[Delete.type, Done]
+	{
+		//持久化删除事件回复完成
+		case (Delete, ctx, _) => ctx.thenPersist(Deleted)(_ => ctx.reply(Done))
+	}
 	//处理事件
 	.onEvent
 	{
+		//更新事件
 		case (e: Updated, state) =>
 			//更新聚合根
 		state.data.map(_.update(e))
 		state
+		//删除事件
+		case (Deleted, state) => state.changeStatus(UserStatus.Deletion)
 	}
 }

@@ -1,5 +1,6 @@
 package com.github.btr.micro.tool
 
+import org.joda.time.DateTime
 import play.api.data.validation.ValidationError
 import play.api.libs.json._
 
@@ -42,31 +43,13 @@ object JSONTool
 	//单个值读写
 	def singletonFormat[O](singleton: O): Format[O] = Format(singletonReads(singleton), singletonWrites)
 
-	val dateTime = "yyyy-MM-dd HH:mm:ss"
+	implicit object dataTimeFormat extends Format[DateTime]
+	{
+		val dateTime = "yyyy-MM-dd HH:mm:ss"
 
-//	implicit val localDateTimeReads : Reads[LocalDateTime]  = implicitly[Reads[String]]
-//	.collect(ValidationError("无效LocalDateTime"))(Function.unlift
-//	{
-//		s => Try(LocalDateTime.parse(s, DateTimeFormatter.ofPattern(dateTime))).toOption
-//	})
-//	implicit val localDateTimeWrites: Writes[LocalDateTime] = Writes
-//	{
-//		d => JsString(d.toString)
-//	}
+		override def reads(json: JsValue): JsResult[DateTime] = JsSuccess(json.as[DateTime])
 
-//	implicit val dateReads = Reads.jodaLocalDateReads(dateTime)
-
-//	implicit val dateWrites = Writes.jodaLocalDateWrites(dateTime)
-
-//	implicit val dateTimeReads = Reads.jodaDateReads(dateTime)
-
-//	implicit val dateTimeReads:Reads[String] = Reads.jodaDateReads(dateTime)
-//	.collect(ValidationError("无效DateTime"))(Function.unlift
-//	{
-//		d => Try(d.toString(dateTime)).toOption
-//	})
-
-//	implicit val dateTimeWrites = Writes.jodaDateWrites(dateTime)
-
+		override def writes(o: DateTime): JsValue = JsString(o.toString(dateTime))
+	}
 }
 

@@ -10,18 +10,15 @@ import com.lightbend.lagom.scaladsl.api.transport.Method
 trait InventoryService
 {
 	//增加商品库存
-	def increase:ServiceCall[Inventory,Done]
+	def increase: ServiceCall[Inventory, Done]
 
 	//减少商品库存
-	def decrease:ServiceCall[Inventory,Done]
+	def decrease: ServiceCall[Inventory, Done]
 
-	def descriptor =
-	{
-		import com.lightbend.lagom.scaladsl.api.Service._
+	import com.lightbend.lagom.scaladsl.api.Service._
 
-		named("inventories").withCalls(
-			restCall(Method.POST,"/api/v2/inventories",increase),
-			restCall(Method.POST,"/api/v2/inventories",increase),
-		)
-	}
+	def descriptor = named("inventories").withCalls(
+		restCall(Method.POST, "/api/v2/inventories/increase", increase),
+		restCall(Method.POST, "/api/v2/inventories/decrease", decrease)
+	).withAutoAcl(true)
 }

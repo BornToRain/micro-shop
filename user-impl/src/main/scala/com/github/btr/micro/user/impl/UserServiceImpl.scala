@@ -40,7 +40,7 @@ class UserServiceImpl(registry: PersistentEntityRegistry)(implicit ec:ExecutionC
 	override def update(id: String) = ServiceCall
 	{
 		//更新命令
-		d => refFor(id).ask(Update(d.mobile, d.name, d.birthday))
+		d => refFor(id).ask(Update(id,d.mobile, d.name, d.birthday))
 	}
 
 	override def delete(id: String) = ServiceCall

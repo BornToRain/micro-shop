@@ -6,11 +6,6 @@ organization in ThisBuild := "com.github.btr"
 //简化代码
 val macwire = "com.softwaremill.macwire" %% "macros" % "2.2.5" % "provided"
 
-////模块基本属性设置
-//def baseSettings = Seq(
-//	javacOptions in compile ++= Seq("-encoding", "UTF-8", "-source", "1.8", "-target", "1.8", "-Xlint:unchecked", "-Xlint:deprecation")
-//)
-
 //模块基础配置
 def project(id: String) = Project(id, base = file(id))
 .settings(javacOptions in compile ++= Seq("-encoding", "UTF-8", "-source", "1.8", "-target", "1.8", "-Xlint:unchecked", "-Xlint:deprecation"))
@@ -35,6 +30,7 @@ lazy val `user-api` = project("user-api")
 		lagomScaladslApi
 	)
 )
+.dependsOn(`micro-tool`)
 //用户模块实现
 lazy val `user-impl` = project("user-impl")
 .enablePlugins(LagomScala)
@@ -56,6 +52,7 @@ lazy val `product-api` = project("product-api")
 		lagomScaladslApi
 	)
 )
+.dependsOn(`micro-tool`)
 //商品模块实现
 lazy val `product-impl` = project("product-impl")
 .enablePlugins(LagomScala)
@@ -131,3 +128,23 @@ lazy val `cart-impl` = project("cart-impl")
 	)
 )
 .dependsOn(`micro-tool`, `cart-api`)
+
+//搜索模块接口
+lazy val `search-api` = project("search-api")
+.settings(
+	name := "search-api",
+	libraryDependencies ++= Seq(
+		lagomScaladslApi
+	)
+)
+.dependsOn(`micro-tool`)
+//搜索模块实现
+lazy val `search-impl` = project("search-impl")
+.settings(
+	name := "search-impl",
+	libraryDependencies ++= Seq(
+		macwire,
+		lagomScaladslServer
+	)
+)
+.dependsOn(`micro-tool`,`search-api`)

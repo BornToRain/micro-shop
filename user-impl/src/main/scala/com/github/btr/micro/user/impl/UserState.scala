@@ -10,8 +10,8 @@ import play.api.libs.json.{Format, Json}
 object UserStatus extends Enumeration
 {
 	type Status = Value
-	//不存在 注册 正常 冻结
-	val Nonexistence, Registration, Normal, Freeze = Value
+	//不存在 注册 正常 冻结 删除
+	val Nonexistence, Registration, Normal, Freeze,Deletion = Value
 
 	implicit val format: Format[Status] = enumFormat(UserStatus)
 }

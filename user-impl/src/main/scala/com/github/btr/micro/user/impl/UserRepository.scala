@@ -3,8 +3,8 @@ package com.github.btr.micro.user.impl
 
 import akka.Done
 import com.datastax.driver.core.PreparedStatement
-import com.lightbend.lagom.scaladsl.persistence.ReadSideProcessor
 import com.lightbend.lagom.scaladsl.persistence.cassandra.{CassandraReadSide, CassandraSession}
+import com.lightbend.lagom.scaladsl.persistence.{EventStreamElement, ReadSideProcessor}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -32,6 +32,9 @@ extends ReadSideProcessor[UserEvt]
 	override def buildHandler() = readSide.builder[UserEvt]("userEvtOffSet")
 	.setGlobalPrepare(() => createTable)
 	.setPrepare(_ => fSQL)
+	.setEventHandler[Created](e => insertUser(e.event))
+	.setEventHandler[Updated](e => updateUser(e.event))
+	.setEventHandler[Deleted.type](deleteUser)
 	.build
 
 
@@ -49,10 +52,11 @@ extends ReadSideProcessor[UserEvt]
 		 			birthday date,
 		 			create_time timestamp,
 					update_time timestamp
-				)
+				) WITH CLUSTERING ORDER BY (create_time DESC)
 			""")
 	} yield Done
 
+	//SQL
 	private def fSQL = for
 	{
 		insert <- session.prepare("INSERT INTO user(id,mobile,name,birthday,create_time,update_time) VALUES(?,?,?,?,?,?)")
@@ -66,5 +70,15 @@ extends ReadSideProcessor[UserEvt]
 				Done
 			}
 
-	private def insertUser(evt: Created) = Future.successful(insertPre.bind(evt.cmd.id, evt.cmd.mobile, evt.cmd.name, evt.cmd.birthday))
+	//插入用户
+	private def insertUser(evt: Created) = Future
+	.successful(List(insertPre.bind(evt.cmd.id, evt.cmd.mobile, evt.cmd.name, evt.cmd.birthday, evt.cmd.createTime, evt.cmd.updateTime)))
+
+	//更新用户
+	private def updateUser(evt: Updated) = Future
+	.successful(List(updatePre.bind(evt.cmd.mobile, evt.cmd.name, evt.cmd.birthday, evt.cmd.updateTime, evt.cmd.id)))
+
+	//删除用户
+	private def deleteUser(evt: EventStreamElement[Deleted.type]) = Future
+	.successful(List(deletePre.bind(evt.entityId)))
 }

@@ -27,7 +27,8 @@ case object Get extends UserCmd[Option[User]]
 }
 
 //更新
-case class Update(mobile: String, name: Option[String], birthday: Option[LocalDate], updateTime: DateTime = DateTime.now) extends UserCmd[Done]
+case class Update(id: String, mobile: String, name: Option[String], birthday: Option[LocalDate], updateTime: DateTime = DateTime.now)
+extends UserCmd[Done]
 
 object Update
 {

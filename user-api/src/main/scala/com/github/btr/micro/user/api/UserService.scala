@@ -1,6 +1,7 @@
 package com.github.btr.micro.user.api
 
 import akka.{Done, NotUsed}
+import com.github.btr.micro.tool.ServiceDescriptor
 import com.lightbend.lagom.scaladsl.api.transport.Method
 import com.lightbend.lagom.scaladsl.api.{Service, ServiceCall}
 
@@ -9,6 +10,8 @@ import com.lightbend.lagom.scaladsl.api.{Service, ServiceCall}
 	*/
 trait UserService extends Service
 {
+	val sd = ServiceDescriptor("users", "v1")
+
 	//个人信息
 	def info(id: String): ServiceCall[NotUsed, User]
 
@@ -23,10 +26,10 @@ trait UserService extends Service
 
 	import Service._
 
-	def descriptor = named("users").withCalls(
-		restCall(Method.GET, "/api/v1/users/:id", info _),
-		restCall(Method.POST, "/api/v1/users", create),
-		restCall(Method.PUT, "/api/v1/users/:id", update _),
-		restCall(Method.DELETE, "/api/v1/users/:id", delete _)
+	def descriptor = named(sd.name).withCalls(
+		restCall(Method.GET, sd.versionURI("/:id"), info _),
+		restCall(Method.POST, sd.versionURI(), create),
+		restCall(Method.PUT, sd.versionURI("/:id"), update _),
+		restCall(Method.DELETE, sd.versionURI("/:id"), delete _)
 	).withAutoAcl(true)
 }
