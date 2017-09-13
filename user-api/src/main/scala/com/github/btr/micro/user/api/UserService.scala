@@ -50,7 +50,8 @@ object Info
 }
 
 //用户地址创建DTO
-case class AddressCreation(userId: String, province: String, city: String, district: String, zipCode: Option[String], street: String)
+case class AddressCreation(userId: String, province: String, city: String, district: String, zipCode: Option[String], street: String,
+	`type`: AddressType.Type)
 
 object AddressCreation
 {
@@ -67,3 +68,12 @@ object AddressStatus extends Enumeration
 	implicit val format: Format[Status] = enumFormat(AddressStatus)
 }
 
+//收货地址类型
+object AddressType extends Enumeration
+{
+	type Type = Value
+	//家 公司 学校
+	val Home, Company, School = Value
+
+	implicit val format: Format[Type] = enumFormat(AddressType)
+}

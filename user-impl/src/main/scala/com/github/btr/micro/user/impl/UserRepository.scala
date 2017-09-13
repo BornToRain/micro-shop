@@ -49,7 +49,7 @@ extends ReadSideProcessor[UserEvt]
 					first_name text,
 		      last_name text,
 		 			age int,
-					addresses list<text>
+					addresses map<text,frozen<address>>
 		 			create_time timestamp,
 					update_time timestamp,
           PRIMARY KEY (id)
@@ -65,7 +65,8 @@ extends ReadSideProcessor[UserEvt]
 					district text,
 		      zip_code text,
 					street text,
-		      status text
+		      status text,
+					type text
 				)
 			"""
 		)

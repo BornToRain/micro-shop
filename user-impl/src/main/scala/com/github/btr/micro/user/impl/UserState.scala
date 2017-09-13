@@ -35,15 +35,3 @@ object UserState
 	//创建
 	def create(data: User) = UserState(Some(data), UserStatus.Normal)
 }
-
-/**
-	* 收货地址状态
-	*/
-object AddressStatus extends Enumeration
-{
-	//停用、启用
-	type Status = Value
-	val Stop, Use = Value
-
-	implicit val format: Format[Status] = enumFormat(AddressStatus)
-}
