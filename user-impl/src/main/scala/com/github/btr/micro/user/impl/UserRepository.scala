@@ -11,7 +11,7 @@ import scala.concurrent.{ExecutionContext, Future}
 /**
 	* 用户仓储 - 读边
 	*/
-private[impl] class UserRepository(session: CassandraSession)(implicit ex: ExecutionContext)
+class UserRepository(session: CassandraSession)(implicit ex: ExecutionContext)
 {
 
 }
@@ -19,12 +19,11 @@ private[impl] class UserRepository(session: CassandraSession)(implicit ex: Execu
 /**
 	* 用户事件处理
 	*/
-private[impl] class UserReadSide(session: CassandraSession, readSide: CassandraReadSide)(implicit ec: ExecutionContext)
+class UserReadSideProcessor(session: CassandraSession, readSide: CassandraReadSide)(implicit ec: ExecutionContext)
 extends ReadSideProcessor[UserEvt]
 {
 
 	private var insertPre: PreparedStatement = _
-	private var updatePre: PreparedStatement = _
 	private var deletePre: PreparedStatement = _
 
 	override def aggregateTags = UserEvt.tag.allTags
@@ -33,7 +32,6 @@ extends ReadSideProcessor[UserEvt]
 	.setGlobalPrepare(() => createTable)
 	.setPrepare(_ => fSQL)
 	.setEventHandler[Created](e => insertUser(e.event))
-	.setEventHandler[Updated](e => updateUser(e.event))
 	.setEventHandler[Deleted.type](deleteUser)
 	.build
 
@@ -48,35 +46,46 @@ extends ReadSideProcessor[UserEvt]
 				(
 					id text PRIMARY KEY,
 					mobile text,
-					name text,
-		 			birthday date,
+					first_name text,
+		      last_name text,
+		 			age int,
+					addresses list<text>
 		 			create_time timestamp,
-					update_time timestamp
+					update_time timestamp,
+          PRIMARY KEY (id)
 				) WITH CLUSTERING ORDER BY (create_time DESC)
 			""")
+		//收货地址表
+		_ <- session.executeCreateTable(
+			"""
+				CREATE TYPE IF NOT EXISTS address
+				(
+					province text,
+		      city text,
+					district text,
+		      zip_code text,
+					street text,
+		      status text
+				)
+			"""
+		)
 	} yield Done
 
 	//SQL
 	private def fSQL = for
 	{
 		insert <- session.prepare("INSERT INTO user(id,mobile,name,birthday,create_time,update_time) VALUES(?,?,?,?,?,?)")
-		update <- session.prepare("UPDATE user SET mobile = ?,name = ?,birthday=?,update_time=? WHERE id = ?")
 		delete <- session.prepare("DELETE FROM user WHERE id = ?")
 	} yield
 			{
 				insertPre = insert
-				updatePre = update
 				deletePre = delete
 				Done
 			}
 
 	//插入用户
 	private def insertUser(evt: Created) = Future
-	.successful(List(insertPre.bind(evt.cmd.id, evt.cmd.mobile, evt.cmd.name, evt.cmd.birthday, evt.cmd.createTime, evt.cmd.updateTime)))
-
-	//更新用户
-	private def updateUser(evt: Updated) = Future
-	.successful(List(updatePre.bind(evt.cmd.mobile, evt.cmd.name, evt.cmd.birthday, evt.cmd.updateTime, evt.cmd.id)))
+	.successful(List(insertPre.bind(evt.cmd.id, evt.cmd.mobile, evt.cmd.firstName,evt.cmd.lastName, evt.cmd.age, evt.cmd.createTime, evt.cmd.updateTime)))
 
 	//删除用户
 	private def deleteUser(evt: EventStreamElement[Deleted.type]) = Future

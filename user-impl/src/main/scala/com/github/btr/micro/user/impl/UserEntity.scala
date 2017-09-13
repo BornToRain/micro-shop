@@ -52,32 +52,32 @@ class UserEntity extends PersistentEntity
 	.onEvent
 	{
 		//创建聚合根
-		case (Created(cmd), _) => UserState.create(User(cmd.id, cmd.mobile, cmd.name, cmd.birthday, cmd.createTime, cmd.updateTime))
+		case (Created(cmd), _) => UserState.create(User(cmd.id, cmd.mobile, cmd.firstName, cmd.lastName, cmd.age, Nil, cmd.createTime, cmd.updateTime))
 	}
 
 	//正常状态下操作
 	def normal = Actions()
-	//处理更新命令
-	.onCommand[Update, Done]
-	{
-		//持久化更新事件回复完成
-		case (cmd: Update, ctx, _) => ctx.thenPersist(Updated(cmd))(_ => ctx.reply(Done))
-	}
 	//处理删除命令
 	.onCommand[Delete.type, Done]
 	{
 		//持久化删除事件回复完成
 		case (Delete, ctx, _) => ctx.thenPersist(Deleted)(_ => ctx.reply(Done))
 	}
+	//处理创建收货地址命令
+	.onCommand[CreateAddress, Done]
+	{
+		//持久化创建收货地址事件回复完成
+		case (cmd: CreateAddress, ctx, _) => ctx.thenPersist(CreatedAddress(cmd))(_ => ctx.reply(Done))
+	}
 	//处理事件
 	.onEvent
 	{
-		//更新事件
-		case (e: Updated, state) =>
-			//更新聚合根
-		state.data.map(_.update(e))
-		state
 		//删除事件
 		case (Deleted, state) => state.changeStatus(UserStatus.Deletion)
+		//创建收货地址事件
+		case (evt: CreatedAddress, state) =>
+			//添加收货地址
+		state.data.map(_.addAddress(evt))
+		state
 	}
 }

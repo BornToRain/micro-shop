@@ -1,35 +1,69 @@
 package com.github.btr.micro.user.api
 
 import akka.{Done, NotUsed}
-import com.github.btr.micro.tool.ServiceDescriptor
+import com.github.btr.micro.tool.JSONTool._
 import com.lightbend.lagom.scaladsl.api.transport.Method
 import com.lightbend.lagom.scaladsl.api.{Service, ServiceCall}
+import play.api.libs.json.{Format, Json}
 
 /**
 	* 用户接口定义
 	*/
 trait UserService extends Service
 {
-	val sd = ServiceDescriptor("users", "v1")
-
 	//个人信息
-	def info(id: String): ServiceCall[NotUsed, User]
+	def info(id: String): ServiceCall[NotUsed, Info]
 
 	//创建用户
-	def create: ServiceCall[User, String]
-
-	//更新用户
-	def update(id: String): ServiceCall[User, Done]
+	def creation: ServiceCall[Creation, String]
 
 	//删除用户
-	def delete(id: String): ServiceCall[NotUsed, Done]
+	def deletion(id: String): ServiceCall[NotUsed, Done]
+
+	//创建收货地址
+	def addressCreation(userId: String): ServiceCall[AddressCreation, Done]
 
 	import Service._
 
-	def descriptor = named(sd.name).withCalls(
-		restCall(Method.GET, sd.versionURI("/:id"), info _),
-		restCall(Method.POST, sd.versionURI(), create),
-		restCall(Method.PUT, sd.versionURI("/:id"), update _),
-		restCall(Method.DELETE, sd.versionURI("/:id"), delete _)
+	def descriptor = named(serviceDescriptor._1).withCalls(
+		restCall(Method.GET, serviceDescriptor._2 + "/:id", info _),
+		restCall(Method.POST, serviceDescriptor._2, creation),
+		restCall(Method.DELETE, serviceDescriptor._2 + "/:id", deletion _),
+		restCall(Method.POST, serviceDescriptor._2 + "/:userId/address", addressCreation _)
 	).withAutoAcl(true)
 }
+
+//用户创建DTO
+case class Creation(mobile: String, firstName: Option[String], lastName: Option[String], age: Option[Int])
+
+object Creation
+{
+	implicit val format: Format[Creation] = Json.format
+}
+
+//用户详情DTO
+case class Info(id: String, mobile: String, firstName: Option[String], lastName: Option[String], age: Option[Int])
+
+object Info
+{
+	implicit val format: Format[Info] = Json.format
+}
+
+//用户地址创建DTO
+case class AddressCreation(userId: String, province: String, city: String, district: String, zipCode: Option[String], street: String)
+
+object AddressCreation
+{
+	implicit val format: Format[AddressCreation] = Json.format
+}
+
+//收货地址状态
+object AddressStatus extends Enumeration
+{
+	//停用、启用
+	type Status = Value
+	val Stop, Use = Value
+
+	implicit val format: Format[Status] = enumFormat(AddressStatus)
+}
+

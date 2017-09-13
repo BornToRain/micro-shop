@@ -1,6 +1,5 @@
 package com.github.btr.micro.tool
 
-import org.joda.time.DateTime
 import play.api.data.validation.ValidationError
 import play.api.libs.json._
 
@@ -42,14 +41,5 @@ object JSONTool
 
 	//单个值读写
 	def singletonFormat[O](singleton: O): Format[O] = Format(singletonReads(singleton), singletonWrites)
-
-	implicit object dataTimeFormat extends Format[DateTime]
-	{
-		val dateTime = "yyyy-MM-dd HH:mm:ss"
-
-		override def reads(json: JsValue): JsResult[DateTime] = JsSuccess(json.as[DateTime])
-
-		override def writes(o: DateTime): JsValue = JsString(o.toString(dateTime))
-	}
 }
 

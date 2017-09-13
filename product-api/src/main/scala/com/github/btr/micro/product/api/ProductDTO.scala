@@ -7,9 +7,18 @@ import play.api.libs.json.{Format, Json}
 	*/
 sealed trait ProductDTO
 
-case class Product(id: String, sellId: String, name: String, price: Double, illustrations: Option[String], `type`: Option[String]) extends ProductDTO
+//创建DTO
+case class Create(sellId: String, name: String, price: Double, illustrations: Option[String], `type`: Option[String]) extends ProductDTO
 
-object Product
+object Create
 {
-	implicit val format: Format[Product] = Json.format
+	implicit val format: Format[Create] = Json.format
+}
+
+//详情DTO
+case class Info(id: String, sellId: String, name: String, price: Double, illustrations: Option[String], `type`: Option[String]) extends ProductDTO
+
+object Info
+{
+	implicit val format: Format[Info] = Json.format
 }

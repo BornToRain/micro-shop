@@ -52,7 +52,6 @@ lazy val `product-api` = project("product-api")
 		lagomScaladslApi
 	)
 )
-.dependsOn(`micro-tool`)
 //商品模块实现
 lazy val `product-impl` = project("product-impl")
 .enablePlugins(LagomScala)
@@ -137,7 +136,6 @@ lazy val `search-api` = project("search-api")
 		lagomScaladslApi
 	)
 )
-.dependsOn(`micro-tool`)
 //搜索模块实现
 lazy val `search-impl` = project("search-impl")
 .settings(
@@ -148,3 +146,5 @@ lazy val `search-impl` = project("search-impl")
 	)
 )
 .dependsOn(`micro-tool`,`search-api`)
+
+lagomCassandraCleanOnStart in ThisBuild := true

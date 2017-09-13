@@ -20,24 +20,24 @@ object UserEvt
 }
 
 //创建
-case class Created(cmd:Create) extends UserEvt
+case class Created(cmd: Create) extends UserEvt
 
 object Created
 {
 	implicit val format: Format[Created] = Json.format
 }
 
-//更新
-case class Updated(cmd:Update) extends UserEvt
-
-object Updated
-{
-	implicit val format: Format[Updated] = Json.format
-}
-
 //删除
 case object Deleted extends UserEvt
 {
 	implicit val format: Format[Deleted.type] = singletonFormat(Deleted)
+}
+
+//创建收货地址
+case class CreatedAddress(cmd: CreateAddress) extends UserEvt
+
+object CreatedAddress
+{
+	implicit val format: Format[CreatedAddress] = Json.format
 }
 

@@ -21,17 +21,17 @@ class ProductServiceImpl(registry: PersistentEntityRegistry)(implicit ec: Execut
 		refFor(id).ask(Get).map
 		{
 			//转换接口响应DTO
-			case Some(d) => api.Product(d.id, d.sellId, d.name, d.price, d.illustrations, d.`type`)
+			case Some(d) => api.Info(d.id, d.sellId, d.name, d.price, d.illustrations, d.`type`)
 			//404 NotFound
 			case _ => throw NotFound(s"ID为${id }的商品不存在")
 		}
 	}
 
-	override def create = ???
+	override def creation = ???
 
 	override def update(id: String) = ???
 
-	override def delete(id: String) = ???
+	override def deletion(id: String) = ???
 
 
 	private def refFor(id: String) = registry.refFor[ProductEntity](id)

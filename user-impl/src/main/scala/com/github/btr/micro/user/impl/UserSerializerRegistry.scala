@@ -11,11 +11,9 @@ object UserSerializerRegistry extends JsonSerializerRegistry
 		//命令
 		JsonSerializer[Create],
 		JsonSerializer[Get.type],
-		JsonSerializer[Update],
 		JsonSerializer[Delete.type ],
 		//事件
 		JsonSerializer[Created],
-		JsonSerializer[Updated],
 		JsonSerializer[Deleted.type],
 		//状态
 		JsonSerializer[UserState]

@@ -1,7 +1,6 @@
 package com.github.btr.micro.product.api
 
 import akka.{Done, NotUsed}
-import com.github.btr.micro.tool.ServiceDescriptor
 import com.lightbend.lagom.scaladsl.api.transport.Method
 import com.lightbend.lagom.scaladsl.api.{Service, ServiceCall}
 
@@ -10,27 +9,25 @@ import com.lightbend.lagom.scaladsl.api.{Service, ServiceCall}
 	*/
 trait ProductService extends Service
 {
-	val sd = ServiceDescriptor("products", "v1")
-
 	//商品信息
-	def info(id: String): ServiceCall[NotUsed, Product]
+	def info(id: String): ServiceCall[NotUsed, Info]
 
 	//创建
-	def create: ServiceCall[Product, String]
+	def creation: ServiceCall[Product, String]
 
 	//更新
-	def update(id: String): ServiceCall[Product, Done]
+	def update(id: String): ServiceCall[Info, Done]
 
 	//删除
-	def delete(id: String): ServiceCall[NotUsed, Done]
+	def deletion(id: String): ServiceCall[NotUsed, Done]
 
 
 	import Service._
 
-	def descriptor = named(sd.name).withCalls(
-		restCall(Method.GET, sd.versionURI("/:id"), info _),
-		restCall(Method.POST, sd.versionURI(), create),
-		restCall(Method.PUT, sd.versionURI("/:id"), update _),
-		restCall(Method.DELETE, sd.versionURI("/:id"), delete _)
+	def descriptor = named(serviceDescriptor._1).withCalls(
+		restCall(Method.GET, serviceDescriptor._2 + "/:id", info _),
+		restCall(Method.POST, serviceDescriptor._2, creation),
+		restCall(Method.PUT, serviceDescriptor._2 + "/:id", update _),
+		restCall(Method.DELETE, serviceDescriptor._2 + "/:id", deletion _)
 	).withAutoAcl(true)
 }
