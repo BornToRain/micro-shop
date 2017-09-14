@@ -13,9 +13,7 @@ case class User
 	//手机号
 	mobile: String,
 	//姓
-	firstName: Option[String],
-	//名
-	lastName: Option[String],
+	name: Name,
 	//年龄
 	age: Option[Int],
 	//收货地址
@@ -27,7 +25,7 @@ case class User
 	//添加收货地址
 	def addAddress(evt: CreatedAddress) =
 	{
-		val data = Address(evt.cmd.province, evt.cmd.city, evt.cmd.district, evt.cmd.zipCode, evt.cmd.street, AddressStatus.Use)
+		val data = Address(evt.cmd.province, evt.cmd.city, evt.cmd.district, evt.cmd.zipCode, evt.cmd.street, AddressStatus.Use, evt.cmd.addressType)
 		copy(addresses = addresses :+ data, updateTime = evt.cmd.updateTime)
 	}
 }

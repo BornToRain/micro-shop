@@ -34,7 +34,7 @@ case object Delete extends UserCmd[Done]
 }
 
 //创建收货地址
-case class CreateAddress(province: String, city: String, district: String, zipCode: Option[String], street: String,
+case class CreateAddress(province: String, city: String, district: String, zipCode: Option[String], street: String, addressType: AddressType.Type,
 	updateTime: DateTime = DateTime.now) extends UserCmd[Done]
 
 object CreateAddress
