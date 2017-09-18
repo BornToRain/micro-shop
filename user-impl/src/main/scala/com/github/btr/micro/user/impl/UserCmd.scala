@@ -12,9 +12,9 @@ import play.api.libs.json.{Format, Json}
 sealed trait UserCmd[R] extends ReplyType[R]
 
 //创建
-case class Create(id: String, mobile: String, firstName: Option[String], lastName: Option[String], age: Option[Int],
+case class Create(id: String, mobile: String, name: Option[Name], age: Option[Int],
 	createTime: DateTime = DateTime.now,
-	updateTime: DateTime = DateTime.now) extends UserCmd[String]
+	updateTime: DateTime = DateTime.now) extends UserCmd[Done]
 
 object Create
 {
@@ -34,7 +34,7 @@ case object Delete extends UserCmd[Done]
 }
 
 //创建收货地址
-case class CreateAddress(province: String, city: String, district: String, zipCode: Option[String], street: String, addressType: AddressType.Type,
+case class CreateAddress(province: String, city: String, district: String, zipCode: Option[Int], street: String, addressType: AddressType.Type,
 	updateTime: DateTime = DateTime.now) extends UserCmd[Done]
 
 object CreateAddress

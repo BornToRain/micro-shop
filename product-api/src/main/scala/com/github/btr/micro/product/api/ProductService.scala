@@ -13,7 +13,7 @@ trait ProductService extends Service
 	def info(id: String): ServiceCall[NotUsed, Info]
 
 	//创建
-	def creation: ServiceCall[Product, String]
+	def creation: ServiceCall[Create, String]
 
 	//更新
 	def update(id: String): ServiceCall[Info, Done]

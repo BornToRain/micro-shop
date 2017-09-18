@@ -18,7 +18,8 @@ lazy val `micro-tool` = project("micro-tool")
 .settings(
 	name := "micro-tool",
 	libraryDependencies ++= Seq(
-		lagomScaladslApi
+		lagomScaladslApi,
+		lagomScaladslServer % Optional
 	)
 )
 

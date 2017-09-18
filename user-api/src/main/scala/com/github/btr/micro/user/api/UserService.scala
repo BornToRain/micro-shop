@@ -2,6 +2,7 @@ package com.github.btr.micro.user.api
 
 import akka.{Done, NotUsed}
 import com.github.btr.micro.tool.JSONTool._
+import com.github.btr.micro.user.api
 import com.lightbend.lagom.scaladsl.api.transport.Method
 import com.lightbend.lagom.scaladsl.api.{Service, ServiceCall}
 import play.api.libs.json.{Format, Json}
@@ -15,7 +16,7 @@ trait UserService extends Service
 	def info(id: String): ServiceCall[NotUsed, Info]
 
 	//创建用户
-	def creation: ServiceCall[Creation, String]
+	def creation: ServiceCall[Creation, Done]
 
 	//删除用户
 	def deletion(id: String): ServiceCall[NotUsed, Done]
@@ -29,12 +30,20 @@ trait UserService extends Service
 		restCall(Method.GET, serviceDescriptor._2 + "/:id", info _),
 		restCall(Method.POST, serviceDescriptor._2, creation),
 		restCall(Method.DELETE, serviceDescriptor._2 + "/:id", deletion _),
-		restCall(Method.POST, serviceDescriptor._2 + "/:userId/address", addressCreation _)
+		restCall(Method.POST, serviceDescriptor._2 + "/:userId/addresses", addressCreation _)
 	).withAutoAcl(true)
 }
 
+//姓名值对象
+case class Name(firstName: String, lastName: String, enName: Option[String])
+
+object Name
+{
+	implicit val format: Format[Name] = Json.format
+}
+
 //用户创建DTO
-case class Creation(mobile: String, firstName: Option[String], lastName: Option[String], age: Option[Int])
+case class Creation(mobile: String, name: Option[api.Name], age: Option[Int])
 
 object Creation
 {
@@ -42,7 +51,7 @@ object Creation
 }
 
 //用户详情DTO
-case class Info(id: String, mobile: String, firstName: Option[String], lastName: Option[String], age: Option[Int])
+case class Info(id: String, mobile: String, name: Option[api.Name], age: Option[Int])
 
 object Info
 {
@@ -50,8 +59,8 @@ object Info
 }
 
 //用户地址创建DTO
-case class AddressCreation(userId: String, province: String, city: String, district: String, zipCode: Option[String], street: String,
-	`type`: AddressType.Type)
+case class AddressCreation(userId: String, province: String, city: String, district: String, zipCode: Option[Int], street: String,
+	`type`: api.AddressType.Type)
 
 object AddressCreation
 {

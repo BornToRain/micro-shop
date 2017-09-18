@@ -13,7 +13,7 @@ case class User
 	//手机号
 	mobile: String,
 	//姓
-	name: Name,
+	name: Option[Name],
 	//年龄
 	age: Option[Int],
 	//收货地址
@@ -28,6 +28,7 @@ case class User
 		val data = Address(evt.cmd.province, evt.cmd.city, evt.cmd.district, evt.cmd.zipCode, evt.cmd.street, AddressStatus.Use, evt.cmd.addressType)
 		copy(addresses = addresses :+ data, updateTime = evt.cmd.updateTime)
 	}
+
 }
 
 object User

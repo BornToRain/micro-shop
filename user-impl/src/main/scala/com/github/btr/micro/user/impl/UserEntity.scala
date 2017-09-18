@@ -35,7 +35,7 @@ class UserEntity extends PersistentEntity
 	//已存在状态下无效的命令
 	def existence = Actions()
 	//创建命令
-	.onReadOnlyCommand[Create, String]
+	.onReadOnlyCommand[Create, Done]
 	{
 		case (_: Created, ctx, _) => ctx.invalidCommand("用户已存在!")
 	}
@@ -43,16 +43,16 @@ class UserEntity extends PersistentEntity
 	//不存在状态下操作
 	def nonexistence = Actions()
 	//处理创建命令
-	.onCommand[Create, String]
+	.onCommand[Create, Done]
 	{
 		//持久化创建事件回复创建Id
-		case (cmd: Create, ctx, _) => ctx.thenPersist(Created(cmd))(e => ctx.reply(e.cmd.id))
+		case (cmd: Create, ctx, _) => ctx.thenPersist(Created(cmd))(_ => ctx.reply(Done))
 	}
 	//处理事件
 	.onEvent
 	{
 		//创建聚合根
-		case (Created(cmd), _) => UserState.create(User(cmd.id, cmd.mobile, cmd.firstName, cmd.lastName, cmd.age, Nil, cmd.createTime, cmd.updateTime))
+		case (Created(cmd), _) => UserState.create(User(cmd.id, cmd.mobile, cmd.name, cmd.age, Nil, cmd.createTime, cmd.updateTime))
 	}
 
 	//正常状态下操作

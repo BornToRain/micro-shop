@@ -15,7 +15,7 @@ case class Address
 	//区
 	district: String,
 	//邮政编码
-	zipCode: Option[String],
+	zipCode: Option[Int],
 	//街道
 	street: String,
 	//状态

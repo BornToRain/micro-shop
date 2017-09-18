@@ -46,15 +46,25 @@ extends ReadSideProcessor[UserEvt]
 				(
 					id text PRIMARY KEY,
 					mobile text,
-					first_name text,
-		      last_name text,
+		      name frozen<full_name>
 		 			age int,
-					addresses map<text,frozen<address>>
+					addresses list<frozen<address>>
 		 			create_time timestamp,
 					update_time timestamp,
           PRIMARY KEY (id)
 				) WITH CLUSTERING ORDER BY (create_time DESC)
 			""")
+		//用户姓名表
+		_ <- session.executeCreateTable(
+			"""
+			CREATE TYPE IF NOT EXISTS full_name
+	    (
+		    first_name text,
+				last_name text,
+				en_name text
+	    )
+		"""
+		)
 		//收货地址表
 		_ <- session.executeCreateTable(
 			"""
@@ -63,7 +73,7 @@ extends ReadSideProcessor[UserEvt]
 					province text,
 		      city text,
 					district text,
-		      zip_code text,
+		      zip_code int,
 					street text,
 		      status text,
 					type text
@@ -75,7 +85,7 @@ extends ReadSideProcessor[UserEvt]
 	//SQL
 	private def fSQL = for
 	{
-		insert <- session.prepare("INSERT INTO user(id,mobile,name,birthday,create_time,update_time) VALUES(?,?,?,?,?,?)")
+		insert <- session.prepare("INSERT INTO user(id,mobile,name,age,addresses,create_time,update_time) VALUES(?,?,?,?,?,?,?)")
 		delete <- session.prepare("DELETE FROM user WHERE id = ?")
 	} yield
 			{
@@ -86,7 +96,8 @@ extends ReadSideProcessor[UserEvt]
 
 	//插入用户
 	private def insertUser(evt: Created) = Future
-	.successful(List(insertPre.bind(evt.cmd.id, evt.cmd.mobile, evt.cmd.firstName,evt.cmd.lastName, evt.cmd.age, evt.cmd.createTime, evt.cmd.updateTime)))
+	.successful(
+		List(insertPre.bind(evt.cmd.id, evt.cmd.mobile, evt.cmd.name, evt.cmd.age, evt.cmd.createTime, evt.cmd.updateTime)))
 
 	//删除用户
 	private def deleteUser(evt: EventStreamElement[Deleted.type]) = Future

@@ -6,4 +6,4 @@ package com.github.btr.micro.order.api
 sealed trait OrderDTO
 
 //下单
-case class Create(name:String,)
+case class Create(name:String)
