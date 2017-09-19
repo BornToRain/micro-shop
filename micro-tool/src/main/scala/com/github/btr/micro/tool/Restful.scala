@@ -11,7 +11,7 @@ object Restful
 	/**
 		* Http资源创建成功 => 状态码201
 		*/
-	def created(request: RequestHeader)(implicit id: String) = ResponseHeader(201, MessageProtocol(Some("application/json"), Some("UTF-8")),
+	def created(request: RequestHeader)(id: String) = ResponseHeader(201, MessageProtocol(Some("application/json"), Some("UTF-8")),
 		Vector.empty)
 	.withHeader("Location", request.uri + "/" + id)
 

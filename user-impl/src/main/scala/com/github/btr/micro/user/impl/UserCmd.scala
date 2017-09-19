@@ -33,11 +33,35 @@ case object Delete extends UserCmd[Done]
 	implicit val format: Format[Delete.type] = singletonFormat(Delete)
 }
 
-//创建收货地址
-case class CreateAddress(province: String, city: String, district: String, zipCode: Option[Int], street: String, addressType: AddressType.Type,
+//创建用户收货地址
+case class CreateAddress(userId: String, id: String, province: String, city: String, district: String, zipCode: Option[Int], street: String,
+	addressType: AddressType.Type,
 	updateTime: DateTime = DateTime.now) extends UserCmd[Done]
 
 object CreateAddress
 {
 	implicit val format: Format[CreateAddress] = Json.format
+}
+
+//获取用户收货地址列表
+case object GetAddresses extends UserCmd[Map[String, Address]]
+{
+	implicit val format: Format[GetAddresses.type] = singletonFormat(GetAddresses)
+}
+
+//获取用户收货地址信息
+case class GetAddress(id: String) extends UserCmd[Option[Address]]
+
+object GetAddress
+{
+	implicit val format: Format[GetAddress] = Json.format
+}
+
+//更新用户收货地址
+case class UpdateAddress(userId: String, id: String, province: String, city: String, district: String, zipCode: Option[Int], street: String,
+	addressType: AddressType.Type, updateTime: DateTime = DateTime.now) extends UserCmd[Done]
+
+object UpdateAddress
+{
+	implicit val format: Format[UpdateAddress] = Json.format
 }

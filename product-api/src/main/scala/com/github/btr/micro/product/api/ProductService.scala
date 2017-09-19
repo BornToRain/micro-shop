@@ -13,7 +13,7 @@ trait ProductService extends Service
 	def info(id: String): ServiceCall[NotUsed, Info]
 
 	//创建
-	def creation: ServiceCall[Create, String]
+	def creation: ServiceCall[Create, Done]
 
 	//更新
 	def update(id: String): ServiceCall[Info, Done]
@@ -24,10 +24,10 @@ trait ProductService extends Service
 
 	import Service._
 
-	def descriptor = named(serviceDescriptor._1).withCalls(
-		restCall(Method.GET, serviceDescriptor._2 + "/:id", info _),
-		restCall(Method.POST, serviceDescriptor._2, creation),
-		restCall(Method.PUT, serviceDescriptor._2 + "/:id", update _),
-		restCall(Method.DELETE, serviceDescriptor._2 + "/:id", deletion _)
+	def descriptor = named("products").withCalls(
+		restCall(Method.GET, "/api/products/v1/:id", info _),
+		restCall(Method.POST, "/api/products/v1", creation),
+		restCall(Method.PUT, "/api/products/v1/:id", update _),
+		restCall(Method.DELETE, "/api/products/v1/:id", deletion _)
 	).withAutoAcl(true)
 }

@@ -39,6 +39,10 @@ with AhcWSComponents
 	lazy val lagomServer           : LagomServer            = serverFor[UserService](wire[UserServiceImpl])
 	//注册序列化
 	lazy val jsonSerializerRegistry: JsonSerializerRegistry = UserSerializerRegistry
+	//注册仓库
+	lazy val userRepository        : UserRepository         = wire[UserRepository]
 	//注册持久化
 	persistentEntityRegistry.register(wire[UserEntity])
+	//注册读边
+	readSide.register(wire[UserReadSideProcessor])
 }

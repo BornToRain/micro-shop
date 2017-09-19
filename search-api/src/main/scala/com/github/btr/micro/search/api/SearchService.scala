@@ -13,7 +13,7 @@ trait SearchService extends Service
 
 	import Service._
 
-	def descriptor = named(serviceDescriptor._1).withCalls(
-		restCall(Method.GET, serviceDescriptor._2 + "?pageNo&pageSize", search _)
+	def descriptor = named("search").withCalls(
+		restCall(Method.GET, "/api/search/v1?pageNo&pageSize", search _)
 	).withAutoAcl(true)
 }

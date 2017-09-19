@@ -33,11 +33,19 @@ case object Deleted extends UserEvt
 	implicit val format: Format[Deleted.type] = singletonFormat(Deleted)
 }
 
-//创建收货地址
+//创建用户收货地址
 case class CreatedAddress(cmd: CreateAddress) extends UserEvt
 
 object CreatedAddress
 {
 	implicit val format: Format[CreatedAddress] = Json.format
+}
+
+//更新用户收货地址
+case class UpdatedAddress(cmd: UpdateAddress) extends UserEvt
+
+object UpdatedAddress
+{
+	implicit val format: Format[UpdatedAddress] = Json.format
 }
 

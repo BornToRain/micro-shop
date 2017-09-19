@@ -18,7 +18,7 @@ trait InventoryService
 	import com.lightbend.lagom.scaladsl.api.Service._
 
 	def descriptor = named("inventories").withCalls(
-		restCall(Method.POST, "/api/v2/inventories/increase", increase),
-		restCall(Method.POST, "/api/v2/inventories/decrease", decrease)
+		restCall(Method.POST, "/api/inventories/v1/increase", increase),
+		restCall(Method.POST, "/api/inventories/v1/decrease", decrease)
 	).withAutoAcl(true)
 }

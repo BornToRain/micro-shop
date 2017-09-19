@@ -16,8 +16,8 @@ case class User
 	name: Option[Name],
 	//年龄
 	age: Option[Int],
-	//收货地址
-	addresses: Seq[Address],
+	//用户收货地址
+	addresses: Map[String, Address],
 	createTime: DateTime,
 	updateTime: DateTime
 )
@@ -26,9 +26,31 @@ case class User
 	def addAddress(evt: CreatedAddress) =
 	{
 		val data = Address(evt.cmd.province, evt.cmd.city, evt.cmd.district, evt.cmd.zipCode, evt.cmd.street, AddressStatus.Use, evt.cmd.addressType)
-		copy(addresses = addresses :+ data, updateTime = evt.cmd.updateTime)
+
+		copy(
+			addresses = addresses + (evt.cmd.id -> data),
+			updateTime = evt.cmd.updateTime
+		)
 	}
 
+	//更新收货地址
+	def updateAddress(evt: UpdatedAddress) =
+	{
+		//当前地址信息
+		val address = addresses(evt.cmd.id)
+
+		//更新地址
+		val data = address.copy(
+			province = evt.cmd.province,
+			city = evt.cmd.city,
+			district = evt.cmd.district,
+			zipCode = evt.cmd.zipCode,
+			street = evt.cmd.street,
+			`type` = evt.cmd.addressType
+		)
+
+		copy(addresses = addresses + (evt.cmd.id -> data), updateTime = evt.cmd.updateTime)
+	}
 }
 
 object User
