@@ -44,7 +44,7 @@ extends ReadSideProcessor[UserEvt]
 		//用户姓名表
 		_ <- session.executeCreateTable(
 			"""
-			CREATE TYPE full_name
+			CREATE TYPE IF NOT EXISTS full_name
 	    (
 		    first_name text,
 				last_name text,
@@ -55,7 +55,7 @@ extends ReadSideProcessor[UserEvt]
 		//收货地址表
 		_ <- session.executeCreateTable(
 			"""
-				CREATE TYPE address
+				CREATE TYPE IF NOT EXISTS address
 				(
 					province text,
 		      city text,
@@ -78,9 +78,8 @@ extends ReadSideProcessor[UserEvt]
 		 			age int,
 					addresses map<text,frozen <address>>,
 		 			create_time timestamp,
-					update_time timestamp,
-          PRIMARY KEY (id)
-				) WITH CLUSTERING ORDER BY (create_time DESC)
+					update_time timestamp
+				)
 			""")
 	} yield Done
 
@@ -88,19 +87,24 @@ extends ReadSideProcessor[UserEvt]
 	private def fSQL = for
 	{
 	//插入用户
+//		insertUser <- session.prepare(
+//			"""
+//				INSERT INTO user(id,mobile,name,age,create_time,update_time)
+//				VALUES(?,?,{first_name:?,last_name:?,en_name:?},?,?,?)
+//			""")
 		insertUser <- session.prepare("INSERT INTO user(id,mobile,name,age,addresses,create_time,update_time) VALUES(?,?,?,?,?,?,?)")
 		//删除用户
 		deleteUser <- session.prepare("DELETE FROM user WHERE id = ?")
 		//更新用户收货地址
-		updateAddress <- session
-		.prepare(
-			"UPDATE user SET addresses = address + {'Company':{province:'Test',city:'asdasd',district:'asdasd',zip_code:'?',street:'?',status:'USE',type:'?'}},update_time = ? WHERE id =" +
-			" ?")
+//		updateAddress <- session
+//		.prepare(
+//			"UPDATE user SET addresses = address + {'?':{province:'?',city:'?',district:'?',zip_code:'?',street:'?',status:'USE',type:'?'}},update_time = ? WHERE id =" +
+//			" ?")
 	} yield
 			{
 				insertUserPre = insertUser
 				deleteUserPre = deleteUser
-				updateAddressPre = updateAddress
+//				updateAddressPre = updateAddress
 				Done
 			}
 
@@ -112,6 +116,10 @@ extends ReadSideProcessor[UserEvt]
 		println("创建用户")
 		val cmd = evt.event.cmd
 		println(s"$cmd")
+
+		insertUserPre.bind(cmd.id,cmd.mobile,)
+
+//		Future.successful(List(insertUserPre.bind(cmd.id,cmd.mobile,)))
 		Future.successful(List(insertUserPre.bind(cmd.id, cmd.mobile, cmd.name, cmd.age, cmd.createTime, cmd.updateTime)))
 
 	}
