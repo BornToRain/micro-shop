@@ -2,7 +2,7 @@ package com.github.btr.micro.user.impl
 
 
 import akka.Done
-import com.datastax.driver.core.{PreparedStatement, TypeTokens}
+import com.datastax.driver.core.PreparedStatement
 import com.google.common.reflect.TypeToken
 import com.lightbend.lagom.scaladsl.persistence.cassandra.{CassandraReadSide, CassandraSession}
 import com.lightbend.lagom.scaladsl.persistence.{EventStreamElement, ReadSideProcessor}
@@ -17,21 +17,18 @@ import scala.concurrent.{ExecutionContext, Future, Promise}
 	*/
 class UserRepository(session: CassandraSession)(implicit ex: ExecutionContext)
 {
-	def getUsers =
-	{
-		session.selectAll(
-			"""
+	def getUsers = session.selectAll(
+		"""
 				SELECT * FROM user
 			""").map(_.map(d =>
-		{
-			val name = d.getUDTValue("name")
-			val fullName = Name(name.getString("first_name"), name.getString("last_name"), Option(name.getString("en_name")))
-			val addresses = d.getMap("addresses",TypeToken.of(classOf[String]),TypeToken.of(classOf[Address]))
-			println(s"addresses$addresses")
-			User(d.getString("id"), d.getString("mobile"), Some(fullName), Some(d.getInt("age")), Map.empty, new DateTime(d.getTimestamp("create_time")),
-				new DateTime(d.getTimestamp("update_time")))
-		}))
-	}
+	{
+		val name = d.getUDTValue("name")
+		val fullName = Name(name.getString("first_name"), name.getString("last_name"), Option(name.getString("en_name")))
+		val addresses = d.getMap("addresses", TypeToken.of(classOf[String]), TypeToken.of(classOf[Address]))
+		println(s"addresses$addresses")
+		User(d.getString("id"), d.getString("mobile"), Some(fullName), Some(d.getInt("age")), Map.empty, new DateTime(d.getTimestamp("create_time")),
+			new DateTime(d.getTimestamp("update_time")))
+	}))
 }
 
 
@@ -174,7 +171,7 @@ extends ReadSideProcessor[UserEvt]
 				addressUDT.setString("street", cmd.street)
 				addressUDT.setInt("type", cmd.addressType.id)
 
-				data.setMap("addresses",Map(cmd.id -> addressUDT))
+				data.setMap("addresses", Map(cmd.id -> addressUDT))
 				data.setTimestamp("update_time", cmd.updateTime.toDate)
 				data.setString("id", cmd.userId)
 
@@ -183,7 +180,7 @@ extends ReadSideProcessor[UserEvt]
 		} yield list
 	}
 
-	//获取UDT
+	//获取UserDataType
 	private def getUDTValue(name: String) = session.underlying.map(_.getCluster.getMetadata.getKeyspace("user").getUserType(name).newValue)
 
 }
