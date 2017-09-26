@@ -1,7 +1,6 @@
 package com.github.btr.micro.user.impl
 
 import akka.Done
-import com.datastax.driver.core.{UDTValue, UserType}
 import com.github.btr.micro.tool.JSONTool._
 import com.lightbend.lagom.scaladsl.persistence.PersistentEntity.ReplyType
 import org.joda.time.DateTime

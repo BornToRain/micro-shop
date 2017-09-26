@@ -43,6 +43,6 @@ with AhcWSComponents
 	lazy val userRepository        : UserRepository         = wire[UserRepository]
 	//注册持久化
 	persistentEntityRegistry.register(wire[UserEntity])
-	//注册读边
-	readSide.register(wire[UserReadSideProcessor])
+	//注册事件处理
+	readSide.register(wire[UserEventProcessor])
 }

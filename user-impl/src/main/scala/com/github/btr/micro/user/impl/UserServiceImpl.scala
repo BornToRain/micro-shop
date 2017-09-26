@@ -12,10 +12,16 @@ import scala.concurrent.ExecutionContext
 /**
 	* 用户接口实现
 	*/
-class UserServiceImpl(registry: PersistentEntityRegistry)(implicit ec: ExecutionContext) extends UserService with Api
+class UserServiceImpl(registry: PersistentEntityRegistry, repository: UserRepository)(implicit ec: ExecutionContext) extends UserService with Api
 {
 
 	import com.github.btr.micro.user.api
+
+	override def user = logged(ServerServiceCall
+	{
+				//查询读库全部用户
+		_ => repository.getUsers.map(toApiUsers)
+	})
 
 	override def info(id: String) = logged(ServerServiceCall
 	{
@@ -23,7 +29,7 @@ class UserServiceImpl(registry: PersistentEntityRegistry)(implicit ec: Execution
 		refFor(id).ask(Get).map
 		{
 			//转换接口响应DTO
-			case Some(d) => api.Info(d.id, d.mobile, d.name, d.age,d.addresses)
+			case Some(d) => api.Info(d.id, d.mobile, d.name, d.age,d.addresses,d.createTime)
 			//404 NotFound
 			case _ => throw NotFound(s"ID为${id }的用户不存在")
 		}

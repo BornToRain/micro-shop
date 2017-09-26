@@ -2,16 +2,16 @@ package com.github.btr.micro.user.impl
 
 
 import akka.Done
-import com.datastax.driver.core.PreparedStatement
-import com.github.btr.micro.user.api.Info
+import com.datastax.driver.core.{PreparedStatement, TypeTokens}
+import com.google.common.reflect.TypeToken
 import com.lightbend.lagom.scaladsl.persistence.cassandra.{CassandraReadSide, CassandraSession}
 import com.lightbend.lagom.scaladsl.persistence.{EventStreamElement, ReadSideProcessor}
 import org.joda.time.DateTime
-
-import scala.concurrent.{ExecutionContext, Future, Promise}
+import org.slf4j.LoggerFactory
 
 import scala.collection.JavaConversions._
-import scala.collection._
+import scala.concurrent.{ExecutionContext, Future, Promise}
+
 /**
 	* 用户仓储 - 读边
 	*/
@@ -25,8 +25,11 @@ class UserRepository(session: CassandraSession)(implicit ex: ExecutionContext)
 			""").map(_.map(d =>
 		{
 			val name = d.getUDTValue("name")
-			val fullName = Name(name.getString("first_name"),name.getString("last_name"),Option(name.getString("en_name")))
-			Info(d.getString("id"),d.getString("mobile"),Some(fullName),Some(name.getInt("age")),addresses)
+			val fullName = Name(name.getString("first_name"), name.getString("last_name"), Option(name.getString("en_name")))
+			val addresses = d.getMap("addresses",TypeToken.of(classOf[String]),TypeToken.of(classOf[Address]))
+			println(s"addresses$addresses")
+			User(d.getString("id"), d.getString("mobile"), Some(fullName), Some(d.getInt("age")), Map.empty, new DateTime(d.getTimestamp("create_time")),
+				new DateTime(d.getTimestamp("update_time")))
 		}))
 	}
 }
@@ -35,9 +38,11 @@ class UserRepository(session: CassandraSession)(implicit ex: ExecutionContext)
 /**
 	* 用户事件处理
 	*/
-class UserReadSideProcessor(session: CassandraSession, readSide: CassandraReadSide)(implicit ec: ExecutionContext)
+class UserEventProcessor(session: CassandraSession, readSide: CassandraReadSide)(implicit ec: ExecutionContext)
 extends ReadSideProcessor[UserEvt]
 {
+	private val log = LoggerFactory.getLogger(classOf[UserEventProcessor])
+
 	private val deleteUserPro    = Promise[PreparedStatement]
 	private val insertUserPro    = Promise[PreparedStatement]
 	private val updateAddressPro = Promise[PreparedStatement]
@@ -77,8 +82,8 @@ extends ReadSideProcessor[UserEvt]
 					district text,
 		      zip_code int,
 					street text,
-		      status text,
-					type text
+		      status int,
+					type int
 				)
 			"""
 		)
@@ -102,13 +107,13 @@ extends ReadSideProcessor[UserEvt]
 	private def fSQLs =
 	{
 		//插入用户
-		val insertUser = session.prepare("INSERT INTO user(id,mobile,name,age,addresses,create_time,update_time) VALUES(?,?,?,?,?,?,?)")
+		val insertUser = session.prepare("INSERT INTO user(id,mobile,name,age,create_time,update_time) VALUES(?,?,?,?,?,?)")
 		insertUserPro.completeWith(insertUser)
 		//删除用户
-		val deleteUser = session.prepare("DELETE FROM user WHERE id = ? IF EXISTS")
+		val deleteUser = session.prepare("DELETE FROM user WHERE id = ?")
 		deleteUserPro.completeWith(deleteUser)
 		//更新用户收货地址
-		val updateAddress = session.prepare("UPDATE user SET addresses = address+?")
+		val updateAddress = session.prepare("UPDATE user SET addresses = addresses+?,update_time = ? WHERE id = ?")
 		updateAddressPro.completeWith(updateAddress)
 
 		Future(Done)
@@ -117,12 +122,11 @@ extends ReadSideProcessor[UserEvt]
 	//插入用户
 	private def insertUser(evt: EventStreamElement[Created]) =
 	{
-		println("创建用户")
+		log.info("持久化用户到读边")
 		val cmd = evt.event.cmd
 		for
 		{
-			session <- session.underlying().map(_.getCluster.getMetadata.getKeyspace("user"))
-			nameUDT <- Future(session.getUserType("full_name").newValue())
+			nameUDT <- getUDTValue("full_name")
 			list <- insertUserPro.future.map(ps =>
 			{
 				val data = ps.bind
@@ -130,13 +134,12 @@ extends ReadSideProcessor[UserEvt]
 				data.setString("mobile", cmd.mobile)
 				cmd.name.map(d =>
 				{
-					nameUDT.setString("first_name",d.firstName)
-					nameUDT.setString("last_name",d.lastName)
-					nameUDT.setString("en_name",d.enName.orNull)
+					nameUDT.setString("first_name", d.firstName)
+					nameUDT.setString("last_name", d.lastName)
+					nameUDT.setString("en_name", d.enName.orNull)
 				})
 				data.setUDTValue("name", nameUDT)
 				data.setInt("age", cmd.age.getOrElse(0))
-				data.setMap[String,Address]("addresses",Map[String,Address]())
 				data.setTimestamp("create_time", cmd.createTime.toDate)
 				data.setTimestamp("update_time", cmd.updateTime.toDate)
 
@@ -148,29 +151,39 @@ extends ReadSideProcessor[UserEvt]
 	//删除用户
 	private def deleteUser(evt: EventStreamElement[Deleted.type]) =
 	{
-		println("删除用户")
+		log.info("从读边删除用户")
 		deleteUserPro.future.map(ps => List(ps.bind(evt.entityId)))
 	}
 
 	//更新用户收货地址
 	private def updateAddress(evt: EventStreamElement[CreatedAddress]) =
 	{
-		println("创建用户收货地址")
+		log.info("持久化用户收货地址")
 		val cmd = evt.event.cmd
-		updateAddressPro.future.map(ps =>
+		for
 		{
-			val data = ps.bind
-			data.setString("id", cmd.id)
-			data.setString("province", cmd.province)
-			data.setString("city", cmd.city)
-			data.setString("district", cmd.district)
-			data.setInt("zipCode", cmd.zipCode.getOrElse(0))
-			data.setString("street", cmd.street)
-			data.setInt("type", cmd.addressType.id)
-			data.set("update_time", cmd.updateTime, classOf[DateTime])
+			addressUDT <- getUDTValue("address")
+			list <- updateAddressPro.future.map(ps =>
+			{
+				val data = ps.bind
 
-			List(data)
-		})
+				addressUDT.setString("province", cmd.province)
+				addressUDT.setString("city", cmd.city)
+				addressUDT.setString("district", cmd.district)
+				addressUDT.setInt("zip_code", cmd.zipCode.getOrElse(0))
+				addressUDT.setString("street", cmd.street)
+				addressUDT.setInt("type", cmd.addressType.id)
+
+				data.setMap("addresses",Map(cmd.id -> addressUDT))
+				data.setTimestamp("update_time", cmd.updateTime.toDate)
+				data.setString("id", cmd.userId)
+
+				List(data)
+			})
+		} yield list
 	}
+
+	//获取UDT
+	private def getUDTValue(name: String) = session.underlying.map(_.getCluster.getMetadata.getKeyspace("user").getUserType(name).newValue)
 
 }

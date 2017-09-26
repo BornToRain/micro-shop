@@ -9,6 +9,8 @@ import com.lightbend.lagom.scaladsl.api.{Service, ServiceCall}
 	*/
 trait UserService extends Service
 {
+	def user: ServiceCall[NotUsed, Seq[Info]]
+
 	def info(id: String): ServiceCall[NotUsed, Info]
 
 	def creation: ServiceCall[Creation, Done]
@@ -26,6 +28,8 @@ trait UserService extends Service
 	import Service._
 
 	def descriptor = named("users").withCalls(
+		//用户列表
+		restCall(Method.GET,"/api/users/v1",user),
 		//个人信息
 		restCall(Method.GET, "/api/users/v1/:id", info _),
 		//创建用户

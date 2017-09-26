@@ -1,7 +1,9 @@
 package com.github.btr.micro.tool
 
 import com.lightbend.lagom.scaladsl.server.ServerServiceCall
+import org.joda.time.DateTime
 import org.slf4j.LoggerFactory
+import play.api.libs.json.{Format, Reads, Writes}
 
 /**
 	* 接口日志、权限等
@@ -25,6 +27,10 @@ trait Api
 		}
 		call
 	}
+	val fullDateTime = "yyyy-MM-dd HH:mm:ss"
+
+	implicit val dateFormat:Format[DateTime] = Format[DateTime](Reads.jodaDateReads(fullDateTime), Writes.jodaDateWrites(fullDateTime))
+
 }
 
 

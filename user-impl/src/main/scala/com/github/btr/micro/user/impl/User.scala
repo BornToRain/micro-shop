@@ -27,10 +27,17 @@ case class User
 	{
 		val data = Address(evt.cmd.province, evt.cmd.city, evt.cmd.district, evt.cmd.zipCode, evt.cmd.street, AddressStatus.Use, evt.cmd.addressType)
 
-		copy(
+		println(addresses)
+		println(s"update_time1 ${evt.cmd.updateTime}")
+		val d= copy(
 			addresses = addresses + (evt.cmd.id -> data),
 			updateTime = evt.cmd.updateTime
 		)
+		println(d.addresses)
+		println(s"update_time2 ${d.updateTime}")
+
+		d
+
 	}
 
 	//更新收货地址
