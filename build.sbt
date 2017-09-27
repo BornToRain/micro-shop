@@ -116,6 +116,7 @@ lazy val `cart-api` = project("cart-api")
 		lagomScaladslApi
 	)
 )
+.dependsOn(`product-api`)
 //购物车模块实现
 lazy val `cart-impl` = project("cart-impl")
 .enablePlugins(LagomScala)

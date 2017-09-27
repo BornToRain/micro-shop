@@ -9,41 +9,37 @@ import com.lightbend.lagom.scaladsl.api.{Service, ServiceCall}
 	*/
 trait UserService extends Service
 {
-	def user: ServiceCall[NotUsed, Seq[Info]]
-
-	def info(id: String): ServiceCall[NotUsed, Info]
-
-	def creation: ServiceCall[Creation, Done]
-
-	def deletion(id: String): ServiceCall[NotUsed, Done]
-
-	def address(userId: String): ServiceCall[NotUsed, Map[String, AddressInfo]]
-
-	def addressCreation(userId: String): ServiceCall[AddressCreation, Done]
-
-	def addressInfo(userId: String, id: String): ServiceCall[NotUsed, AddressInfo]
-
-	def addressUpdate(userId: String, id: String): ServiceCall[AddressInfo, Done]
+	def getUsers: ServiceCall[NotUsed, Seq[Info]]
+	def getUser(id: String): ServiceCall[NotUsed, Info]
+	def createUser: ServiceCall[Creation, Done]
+	def deleteUser(id: String): ServiceCall[NotUsed, Done]
+	def getAddresses(userId: String): ServiceCall[NotUsed, Map[String, AddressInfo]]
+	def getAddress(id: String): ServiceCall[NotUsed, AddressInfo]
+	def createAddresses: ServiceCall[AddressCreation, Done]
+	def updateAddress(id: String): ServiceCall[AddressInfo, Done]
+	def deleteAddress(id: String): ServiceCall[NotUsed, Done]
 
 	import Service._
 
 	def descriptor = named("users").withCalls(
 		//用户列表
-		restCall(Method.GET,"/api/users/v1",user),
+		restCall(Method.GET, "/api/users/v1", getUsers),
 		//个人信息
-		restCall(Method.GET, "/api/users/v1/:id", info _),
+		restCall(Method.GET, "/api/users/v1/:id", getUser _),
 		//创建用户
-		restCall(Method.POST, "/api/users/v1", creation),
+		restCall(Method.POST, "/api/users/v1", createUser),
 		//删除用户
-		restCall(Method.DELETE, "/api/users/v1/:id", deletion _),
+		restCall(Method.DELETE, "/api/users/v1/:id", deleteUser _),
 		//用户收货地址列表
-		restCall(Method.GET, "/api/users/v1/:userId/addresses", address _),
-		//创建用户收货地址
-		restCall(Method.POST, "/api/users/v1/:userId/addresses", addressCreation _),
+		restCall(Method.GET, "/api/users/v1/user-addresses?userId", getAddresses _),
 		//用户收货地址信息
-		restCall(Method.GET, "/api/users/v1/:userId/addresses/:id", addressInfo _),
+		restCall(Method.GET, "/api/users/v1/user-addresses/:id", getAddress _),
+		//添加用户收货地址
+		restCall(Method.POST, "/api/users/v1/user-addresses", createAddresses),
 		//更新用户收货地址
-		restCall(Method.POST, "/api/users/v1/:userId/addresses/:id", addressUpdate _)
+		restCall(Method.POST, "/api/users/v1/user-addresses/:id", updateAddress _),
+		//删除用户收货地址
+		restCall(Method.DELETE, "/api/users/v1/user-addresses/:id", deleteAddress _)
 	).withAutoAcl(true)
 }
 

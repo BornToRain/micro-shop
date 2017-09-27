@@ -17,25 +17,25 @@ class UserServiceImpl(registry: PersistentEntityRegistry, repository: UserReposi
 
 	import com.github.btr.micro.user.api
 
-	override def user = logged(ServerServiceCall
+	override def users = logged(ServerServiceCall
 	{
-				//查询读库全部用户
+		//查询读库全部用户
 		_ => repository.getUsers.map(toApiUsers)
 	})
 
-	override def info(id: String) = logged(ServerServiceCall
+	override def get(id: String) = logged(ServerServiceCall
 	{
 		_ => //查询命令
 		refFor(id).ask(Get).map
 		{
 			//转换接口响应DTO
-			case Some(d) => api.Info(d.id, d.mobile, d.name, d.age,d.addresses,d.createTime)
+			case Some(d) => api.Info(d.id, d.mobile, d.name, d.age, d.addresses, d.createTime)
 			//404 NotFound
 			case _ => throw NotFound(s"ID为${id }的用户不存在")
 		}
 	})
 
-	override def creation = logged(ServerServiceCall
+	override def create = logged(ServerServiceCall
 	{
 		(request, d) => //创建命令
 		val id = IdWorker.getFlowIdWorkerInstance.nextSId
@@ -43,14 +43,14 @@ class UserServiceImpl(registry: PersistentEntityRegistry, repository: UserReposi
 		.map(_ => (Restful.created(request)(id), Done))
 	})
 
-	override def deletion(id: String) = logged(ServerServiceCall
+	override def delete(id: String) = logged(ServerServiceCall
 	{
 		(_, _) => //删除命令
 		refFor(id).ask(Delete)
 		.map(_ => (Restful.noContent, Done))
 	})
 
-	override def addressCreation(userId: String) = logged(ServerServiceCall
+	override def addressCreate(userId: String) = logged(ServerServiceCall
 	{
 		(request, d) => //创建收货地址命令
 		val id = IdWorker.getFlowIdWorkerInstance.nextSId
@@ -58,13 +58,13 @@ class UserServiceImpl(registry: PersistentEntityRegistry, repository: UserReposi
 		.map(_ => (Restful.created(request)(id), Done))
 	})
 
-	override def address(userId: String) = logged(ServerServiceCall
+	override def addresses(userId: String) = logged(ServerServiceCall
 	{
 		_ => //查询用户收货地址列表
 		refFor(userId).ask(GetAddresses).map(toApiAddresses)
 	})
 
-	override def addressInfo(userId: String, id: String) = logged(ServerServiceCall
+	override def addressGet(userId: String, id: String) = logged(ServerServiceCall
 	{
 		_ => //查询用户收货地址信息
 		refFor(userId).ask(GetAddress(id)).map

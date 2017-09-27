@@ -8,13 +8,12 @@ import com.lightbend.lagom.scaladsl.persistence.PersistentEntityRegistry
 
 import scala.concurrent.ExecutionContext
 
-
 /**
 	* 商品接口实现
 	*/
 class ProductServiceImpl(registry: PersistentEntityRegistry)(implicit ec: ExecutionContext) extends ProductService
 {
-	override def info(id: String) = ServiceCall
+	override def get(id: String) = ServiceCall
 	{
 		_ =>
 			//查询命令
@@ -26,13 +25,9 @@ class ProductServiceImpl(registry: PersistentEntityRegistry)(implicit ec: Execut
 			case _ => throw NotFound(s"ID为${id }的商品不存在")
 		}
 	}
-
-	override def creation = ???
-
+	override def create = ???
 	override def update(id: String) = ???
-
-	override def deletion(id: String) = ???
-
+	override def delete(id: String) = ???
 
 	private def refFor(id: String) = registry.refFor[ProductEntity](id)
 }

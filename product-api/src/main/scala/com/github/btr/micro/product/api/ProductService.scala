@@ -9,25 +9,21 @@ import com.lightbend.lagom.scaladsl.api.{Service, ServiceCall}
 	*/
 trait ProductService extends Service
 {
-	//商品信息
-	def info(id: String): ServiceCall[NotUsed, Info]
-
-	//创建
-	def creation: ServiceCall[Create, Done]
-
-	//更新
+	def get(id: String): ServiceCall[NotUsed, Info]
+	def create: ServiceCall[Create, Done]
 	def update(id: String): ServiceCall[Info, Done]
-
-	//删除
-	def deletion(id: String): ServiceCall[NotUsed, Done]
-
+	def delete(id: String): ServiceCall[NotUsed, Done]
 
 	import Service._
 
 	def descriptor = named("products").withCalls(
-		restCall(Method.GET, "/api/products/v1/:id", info _),
-		restCall(Method.POST, "/api/products/v1", creation),
+		//商品信息
+		restCall(Method.GET, "/api/products/v1/:id", get _),
+		//商品创建
+		restCall(Method.POST, "/api/products/v1", create),
+		//商品更新
 		restCall(Method.PUT, "/api/products/v1/:id", update _),
-		restCall(Method.DELETE, "/api/products/v1/:id", deletion _)
+		//商品删除
+		restCall(Method.DELETE, "/api/products/v1/:id", delete _)
 	).withAutoAcl(true)
 }
