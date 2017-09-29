@@ -17,13 +17,13 @@ class UserServiceImpl(registry: PersistentEntityRegistry, repository: UserReposi
 
 	import com.github.btr.micro.user.api
 
-	override def users = logged(ServerServiceCall
+	override def getUsers = v1(ServerServiceCall
 	{
 		//查询读库全部用户
 		_ => repository.getUsers.map(toApiUsers)
 	})
 
-	override def get(id: String) = logged(ServerServiceCall
+	override def getUser(id: String) = v1(ServerServiceCall
 	{
 		_ => //查询命令
 		refFor(id).ask(Get).map
@@ -35,7 +35,7 @@ class UserServiceImpl(registry: PersistentEntityRegistry, repository: UserReposi
 		}
 	})
 
-	override def create = logged(ServerServiceCall
+	override def createUser = v1(ServerServiceCall
 	{
 		(request, d) => //创建命令
 		val id = IdWorker.getFlowIdWorkerInstance.nextSId
@@ -43,28 +43,20 @@ class UserServiceImpl(registry: PersistentEntityRegistry, repository: UserReposi
 		.map(_ => (Restful.created(request)(id), Done))
 	})
 
-	override def delete(id: String) = logged(ServerServiceCall
+	override def deleteUser(id: String) = v1(ServerServiceCall
 	{
 		(_, _) => //删除命令
 		refFor(id).ask(Delete)
 		.map(_ => (Restful.noContent, Done))
 	})
 
-	override def addressCreate(userId: String) = logged(ServerServiceCall
-	{
-		(request, d) => //创建收货地址命令
-		val id = IdWorker.getFlowIdWorkerInstance.nextSId
-		refFor(userId).ask(CreateAddress(userId, id, d.province, d.city, d.district, d.zipCode, d.street, d.`type`))
-		.map(_ => (Restful.created(request)(id), Done))
-	})
-
-	override def addresses(userId: String) = logged(ServerServiceCall
+	override def getAddresses(userId: String) = v1(ServerServiceCall
 	{
 		_ => //查询用户收货地址列表
 		refFor(userId).ask(GetAddresses).map(toApiAddresses)
 	})
 
-	override def addressGet(userId: String, id: String) = logged(ServerServiceCall
+	override def getAddress(userId: String, id: String) = v1(ServerServiceCall
 	{
 		_ => //查询用户收货地址信息
 		refFor(userId).ask(GetAddress(id)).map
@@ -76,11 +68,26 @@ class UserServiceImpl(registry: PersistentEntityRegistry, repository: UserReposi
 		}
 	})
 
-	override def addressUpdate(userId: String, id: String) = logged(ServerServiceCall
+	override def createAddress(userId: String) = v1(ServerServiceCall
+	{
+		(request, d) => //创建收货地址命令
+		val id = IdWorker.getFlowIdWorkerInstance.nextSId
+		refFor(userId).ask(CreateAddress(userId, id, d.province, d.city, d.district, d.zipCode, d.street, d.`type`))
+		.map(_ => (Restful.created(request)(id), Done))
+	})
+
+	override def updateAddress(userId: String, id: String) = v1(ServerServiceCall
 	{
 		d => //更新用户收货地址
 		refFor(userId).ask(UpdateAddress(userId, id, d.province, d.city, d.district, d.zipCode, d.street, d.`type`))
 		.map(_ => Done)
+	})
+
+	override def deleteAddress(userId: String, id: String) = v1(ServerServiceCall
+	{
+		(_, _) => //删除用户收货地址
+		refFor(userId).ask(DeleteAddress(id))
+		.map(_ => (Restful.noContent, Done))
 	})
 
 	private def refFor(id: String) = registry.refFor[UserEntity](id)

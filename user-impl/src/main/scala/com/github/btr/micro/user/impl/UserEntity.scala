@@ -24,6 +24,8 @@ class UserEntity extends PersistentEntity
 		case UserState(_, UserStatus.Normal) => get orElse existence orElse normal
 		//冻结状态
 		case UserState(_, UserStatus.Freeze) => get orElse existence orElse normal
+		//删除状态
+		case UserState(_, UserStatus.Deletion) => get
 	}
 
 	//用户信息
@@ -52,7 +54,9 @@ class UserEntity extends PersistentEntity
 	.onEvent
 	{
 		//创建聚合根
-		case (Created(cmd), _) => UserState.create(User(cmd.id, cmd.mobile, cmd.name, cmd.age, Map[String, Address]("String" -> Address("Test","test","test",None,"",AddressStatus.Use,AddressType.Home)), cmd.createTime, cmd.updateTime))
+		case (Created(cmd), _) => UserState.create(User(cmd.id, cmd.mobile, cmd.name, cmd.age,
+			Map[String, Address]("String" -> Address("Test", "test", "test", None, "", AddressStatus.Use, AddressType.Home)), cmd.createTime,
+			cmd.updateTime))
 	}
 
 	//正常状态下操作

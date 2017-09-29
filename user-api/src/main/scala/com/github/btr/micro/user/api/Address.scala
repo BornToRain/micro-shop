@@ -5,7 +5,7 @@ import com.github.btr.micro.user.api
 import play.api.libs.json.{Format, Json}
 
 //用户收货地址创建DTO
-case class AddressCreation(userId:String,province: String, city: String, district: String, zipCode: Option[Int], street: String,
+case class AddressCreation(province: String, city: String, district: String, zipCode: Option[Int], street: String,
 	`type`: api.AddressType.Type)
 
 object AddressCreation

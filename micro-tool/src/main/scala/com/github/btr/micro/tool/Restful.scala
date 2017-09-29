@@ -20,17 +20,3 @@ object Restful
 		*/
 	def noContent = ResponseHeader(204, MessageProtocol.empty, Vector.empty)
 }
-
-
-/**
-	* Http参数请求错误 => 状态码400
-	*/
-case class ErrorData(code: Int, msg: String)
-{
-	val toJSONString = Json.toJson(this).toString
-}
-
-object ErrorData
-{
-	implicit val format: Format[ErrorData] = Json.format
-}

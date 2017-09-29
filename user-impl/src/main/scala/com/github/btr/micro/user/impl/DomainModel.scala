@@ -4,8 +4,9 @@ import org.joda.time.DateTime
 import play.api.libs.json.{Format, Json}
 
 /**
-	* 用户聚合根
+	* 领域模型
 	*/
+//用户聚合根
 case class User
 (
 	//唯一标识
@@ -27,17 +28,10 @@ case class User
 	{
 		val data = Address(evt.cmd.province, evt.cmd.city, evt.cmd.district, evt.cmd.zipCode, evt.cmd.street, AddressStatus.Use, evt.cmd.addressType)
 
-		println(addresses)
-		println(s"update_time1 ${evt.cmd.updateTime}")
-		val d= copy(
-			addresses = addresses + (evt.cmd.id -> data),
+		copy(
+			addresses = Map(evt.cmd.id -> data),
 			updateTime = evt.cmd.updateTime
 		)
-		println(d.addresses)
-		println(s"update_time2 ${d.updateTime}")
-
-		d
-
 	}
 
 	//更新收货地址
@@ -57,6 +51,13 @@ case class User
 		)
 
 		copy(addresses = addresses + (evt.cmd.id -> data), updateTime = evt.cmd.updateTime)
+	}
+
+	//删除收货地址
+	def deleteAddress(evt:DeletedAddress) =
+	{
+		//删除地址
+		addresses - evt.id
 	}
 }
 

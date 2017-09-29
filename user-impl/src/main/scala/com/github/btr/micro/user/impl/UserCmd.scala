@@ -65,3 +65,11 @@ object UpdateAddress
 {
 	implicit val format: Format[UpdateAddress] = Json.format
 }
+
+//删除用户收货地址
+case class DeleteAddress(id: String) extends UserCmd[Done]
+
+object DeleteAddress
+{
+	implicit val format: Format[DeleteAddress] = Json.format
+}

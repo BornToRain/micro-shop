@@ -40,40 +40,4 @@ package object impl
 	}
 
 	/** ******************领域内值对象转换 ********************/
-	val fullDateTime = "yyyy-MM-dd HH:mm:ss"
-//
-//	implicit val yourJodaDateReads:Reads[DateTime] = Reads.jodaDateReads(fullDateTime)
-//	implicit val yourJodaDateWrites:Writes[DateTime] = Writes.jodaDateWrites(fullDateTime)
-
-//	val fullDateTime = "yyyy-MM-dd HH:mm:ss"
-//
-//	implicit val dateFormat:Format[DateTime] = Format[DateTime](Reads.jodaDateReads(fullDateTime), Writes.jodaDateWrites(fullDateTime))
-//
-//	Reads.DefaultJodaDateReads
-
-//	implicit val jodaDateReads:Reads[DateTime] = Reads[DateTime](js =>
-//		js.validate[String].map[DateTime](dtString =>
-//			DateTime.parse(dtString, DateTimeFormat.forPattern(fullDateTime))
-//		)
-//	)
-//	implicit val formats = Formats.jodaDateTimeFormat(fullDateTime)
-
-
-
-//	implicit val durationReads: Reads[Duration] = implicitly[Reads[String]]
-//	.collect(ValidationError("Invalid duration"))(Function.unlift { str =>
-//	Try(Duration.parse(str)).toOption
-//	})
-//	implicit val durationWrites: Writes[Duration] = Writes { duration =>
-//	JsString(duration.toString)
-//	}
-
-//	implicit val jodaDateWrites: Writes[DateTime] = new Writes[DateTime] {
-//		def writes(d: DateTime): JsValue = JsString(d.toString())
-//	}
-
-//	implicit def dateTimeWrites = Writes.jodaDateWrites(fullDateTime)
-//
-//	implicit def dateTimeReads = Reads.jodaDateReads(fullDateTime)
-
 }

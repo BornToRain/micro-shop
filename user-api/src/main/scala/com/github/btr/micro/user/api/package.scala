@@ -18,7 +18,4 @@ package object api
 		)
 	)
 	implicit val formats = Formats.jodaDateTimeFormat
-
-//	implicit val yourJodaDateReads = Reads.jodaDateReads("yyyy-MM-dd HH:mm:ss")
-
 }
