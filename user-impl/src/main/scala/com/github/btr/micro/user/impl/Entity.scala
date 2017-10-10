@@ -29,32 +29,32 @@ class UserEntity extends PersistentEntity
 	}
 
 	//用户信息
-	def get = Actions().onReadOnlyCommand[Get.type, Option[User]]
+	def get = Actions().onReadOnlyCommand[GetUser.type, Option[User]]
 	{
-		case (Get, ctx, state) => ctx.reply(state.data)
+		case (GetUser, ctx, state) => ctx.reply(state.data)
 	}
 
 	//已存在状态下无效的命令
 	def existence = Actions()
 	//创建命令
-	.onReadOnlyCommand[Create, Done]
+	.onReadOnlyCommand[CreateUser, Done]
 	{
-		case (_: Created, ctx, _) => ctx.invalidCommand("用户已存在!")
+		case (_: CreatedUser, ctx, _) => ctx.invalidCommand("用户已存在!")
 	}
 
 	//不存在状态下操作
 	def nonexistence = Actions()
 	//处理创建命令
-	.onCommand[Create, Done]
+	.onCommand[CreateUser, Done]
 	{
 		//持久化创建事件回复创建Id
-		case (cmd: Create, ctx, _) => ctx.thenPersist(Created(cmd))(_ => ctx.reply(Done))
+		case (cmd: CreateUser, ctx, _) => ctx.thenPersist(CreatedUser(cmd))(_ => ctx.reply(Done))
 	}
 	//处理事件
 	.onEvent
 	{
 		//创建聚合根
-		case (Created(cmd), _) => UserState.create(User(cmd.id, cmd.mobile, cmd.name, cmd.age,
+		case (CreatedUser(cmd), _) => UserState.create(User(cmd.id, cmd.mobile, cmd.name, cmd.age,
 			Map[String, Address]("String" -> Address("Test", "test", "test", None, "", AddressStatus.Use, AddressType.Home)), cmd.createTime,
 			cmd.updateTime))
 	}
@@ -62,16 +62,16 @@ class UserEntity extends PersistentEntity
 	//正常状态下操作
 	def normal = Actions()
 	//处理删除命令
-	.onCommand[Delete.type, Done]
+	.onCommand[DeleteUser.type, Done]
 	{
 		//持久化删除事件回复完成
-		case (Delete, ctx, _) => ctx.thenPersist(Deleted)(_ => ctx.reply(Done))
+		case (DeleteUser, ctx, _) => ctx.thenPersist(DeletedUser)(_ => ctx.reply(Done))
 	}
 	//处理事件
 	.onEvent
 	{
 		//删除事件
-		case (Deleted, state) => state.changeStatus(UserStatus.Deletion)
+		case (DeletedUser, state) => state.changeStatus(UserStatus.Deletion)
 	} orElse address
 
 	//用户收货地址处理

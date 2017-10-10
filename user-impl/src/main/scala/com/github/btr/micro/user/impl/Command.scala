@@ -1,41 +1,42 @@
 package com.github.btr.micro.user.impl
 
 import akka.Done
-import com.github.btr.micro.tool.JSONTool._
+import com.github.btr.micro.tool.JSONTool.singletonFormat
+import com.github.btr.micro.user.impl.AddressType.AddressType
 import com.lightbend.lagom.scaladsl.persistence.PersistentEntity.ReplyType
 import org.joda.time.DateTime
 import play.api.libs.json.{Format, Json}
 
 /**
-	* 用户命令
+	* 领域命令集
 	*/
 sealed trait UserCmd[R] extends ReplyType[R]
 
 //创建
-case class Create(id: String, mobile: String, name: Option[Name], age: Option[Int],
+case class CreateUser(id: String, mobile: String, name: Option[Name], age: Option[Int],
 	createTime: DateTime = DateTime.now,
 	updateTime: DateTime = DateTime.now) extends UserCmd[Done]
 
-object Create
+object CreateUser
 {
-	implicit val format: Format[Create] = Json.format
+	implicit val format: Format[CreateUser] = Json.format
 }
 
 //获取
-case object Get extends UserCmd[Option[User]]
+case object GetUser extends UserCmd[Option[User]]
 {
-	implicit val format: Format[Get.type] = singletonFormat(Get)
+	implicit val format: Format[GetUser.type] = singletonFormat(GetUser)
 }
 
 //删除
-case object Delete extends UserCmd[Done]
+case object DeleteUser extends UserCmd[Done]
 {
-	implicit val format: Format[Delete.type] = singletonFormat(Delete)
+	implicit val format: Format[DeleteUser.type] = singletonFormat(DeleteUser)
 }
 
 //创建用户收货地址
 case class CreateAddress(userId: String, id: String, province: String, city: String, district: String, zipCode: Option[Int], street: String,
-	addressType: AddressType.Type,
+	addressType: AddressType,
 	updateTime: DateTime = DateTime.now) extends UserCmd[Done]
 
 object CreateAddress
@@ -59,7 +60,7 @@ object GetAddress
 
 //更新用户收货地址
 case class UpdateAddress(userId: String, id: String, province: String, city: String, district: String, zipCode: Option[Int], street: String,
-	addressType: AddressType.Type, updateTime: DateTime = DateTime.now) extends UserCmd[Done]
+	addressType: AddressType, updateTime: DateTime = DateTime.now) extends UserCmd[Done]
 
 object UpdateAddress
 {

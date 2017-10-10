@@ -10,12 +10,12 @@ package object api
 
 	val fullDateTime = "yyyy-MM-dd HH:mm:ss"
 
-	implicit val dateFormat:Format[DateTime] = Format[DateTime](Reads.jodaDateReads(fullDateTime), Writes.jodaDateWrites(fullDateTime))
+	implicit val dateFormat: Format[DateTime] = Format[DateTime](Reads.jodaDateReads(fullDateTime), Writes.jodaDateWrites(fullDateTime))
 
-	implicit val jodaDateReads:Reads[DateTime] = Reads[DateTime](js =>
+	implicit val jodaDateReads: Reads[DateTime] = Reads[DateTime](js =>
 		js.validate[String].map[DateTime](dtString =>
 			DateTime.parse(dtString, DateTimeFormat.forPattern(fullDateTime))
 		)
 	)
-	implicit val formats = Formats.jodaDateTimeFormat
+	implicit val formats                        = Formats.jodaDateTimeFormat
 }

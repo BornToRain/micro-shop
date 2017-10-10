@@ -5,21 +5,21 @@ import com.lightbend.lagom.scaladsl.playjson.{JsonSerializer, JsonSerializerRegi
 /**
 	* 序列化
 	*/
-object UserSerializerRegistry extends JsonSerializerRegistry
+object SerializerRegistry extends JsonSerializerRegistry
 {
 	def serializers = Vector(
 		//用户命令
-		JsonSerializer[Create],
-		JsonSerializer[Get.type],
-		JsonSerializer[Delete.type ],
+		JsonSerializer[CreateUser],
+		JsonSerializer[GetUser.type],
+		JsonSerializer[DeleteUser.type],
 		//用户收货地址命令
 		JsonSerializer[CreateAddress],
 		JsonSerializer[UpdateAddress],
 		JsonSerializer[GetAddress],
-		JsonSerializer[GetAddresses.type ],
+		JsonSerializer[GetAddresses.type],
 		//用户事件
-		JsonSerializer[Created],
-		JsonSerializer[Deleted.type],
+		JsonSerializer[CreatedUser],
+		JsonSerializer[DeletedUser.type],
 		//用户收货地址事件
 		JsonSerializer[CreatedAddress],
 		JsonSerializer[UpdatedAddress],

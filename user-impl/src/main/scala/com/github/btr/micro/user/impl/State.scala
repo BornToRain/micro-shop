@@ -1,12 +1,12 @@
 package com.github.btr.micro.user.impl
 
-
-import com.github.btr.micro.tool.JSONTool._
+import com.github.btr.micro.tool.JSONTool.enumFormat
 import play.api.libs.json.{Format, Json}
 
 /**
-	* 用户状态
+	* 领域状态
 	*/
+//用户状态
 object UserStatus extends Enumeration
 {
 	type Status = Value
@@ -35,3 +35,4 @@ object UserState
 	//创建
 	def create(data: User) = UserState(Some(data), UserStatus.Normal)
 }
+

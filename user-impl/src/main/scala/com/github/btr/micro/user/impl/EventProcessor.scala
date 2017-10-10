@@ -1,45 +1,20 @@
 package com.github.btr.micro.user.impl
 
-
 import akka.Done
+import akka.event.slf4j.SLF4JLogging
 import com.datastax.driver.core.PreparedStatement
-import com.google.common.reflect.TypeToken
 import com.lightbend.lagom.scaladsl.persistence.cassandra.{CassandraReadSide, CassandraSession}
 import com.lightbend.lagom.scaladsl.persistence.{EventStreamElement, ReadSideProcessor}
-import org.joda.time.DateTime
-import org.slf4j.LoggerFactory
 
 import scala.collection.JavaConversions._
 import scala.concurrent.{ExecutionContext, Future, Promise}
 
 /**
-	* 用户仓储 - 读边
-	*/
-class UserRepository(session: CassandraSession)(implicit ex: ExecutionContext)
-{
-	def getUsers = session.selectAll(
-		"""
-				SELECT * FROM user
-			""").map(_.map(d =>
-	{
-		val name = d.getUDTValue("name")
-		val fullName = Name(name.getString("first_name"), name.getString("last_name"), Option(name.getString("en_name")))
-		val addresses = d.getMap("addresses", TypeToken.of(classOf[String]), TypeToken.of(classOf[Address]))
-		println(s"addresses$addresses")
-		User(d.getString("id"), d.getString("mobile"), Some(fullName), Some(d.getInt("age")), Map.empty, new DateTime(d.getTimestamp("create_time")),
-			new DateTime(d.getTimestamp("update_time")))
-	}))
-}
-
-
-/**
 	* 用户事件处理
 	*/
 class UserEventProcessor(session: CassandraSession, readSide: CassandraReadSide)(implicit ec: ExecutionContext)
-extends ReadSideProcessor[UserEvt]
+extends ReadSideProcessor[UserEvt] with SLF4JLogging
 {
-	private val log = LoggerFactory.getLogger(classOf[UserEventProcessor])
-
 	private val deleteUserPro    = Promise[PreparedStatement]
 	private val insertUserPro    = Promise[PreparedStatement]
 	private val updateAddressPro = Promise[PreparedStatement]
@@ -49,11 +24,10 @@ extends ReadSideProcessor[UserEvt]
 	override def buildHandler = readSide.builder[UserEvt]("userEvtOffSet")
 	.setGlobalPrepare(() => createTable)
 	.setPrepare(_ => fSQLs)
-	.setEventHandler[Created](insertUser)
-	.setEventHandler[Deleted.type](deleteUser)
+	.setEventHandler[CreatedUser](insertUser)
+	.setEventHandler[DeletedUser.type](deleteUser)
 	.setEventHandler[CreatedAddress](updateAddress)
 	.build
-
 
 	//数据库表创建
 	private def createTable = for
@@ -117,7 +91,7 @@ extends ReadSideProcessor[UserEvt]
 	}
 
 	//插入用户
-	private def insertUser(evt: EventStreamElement[Created]) =
+	private def insertUser(evt: EventStreamElement[CreatedUser]) =
 	{
 		log.info("持久化用户到读边")
 		val cmd = evt.event.cmd
@@ -146,7 +120,7 @@ extends ReadSideProcessor[UserEvt]
 	}
 
 	//删除用户
-	private def deleteUser(evt: EventStreamElement[Deleted.type]) =
+	private def deleteUser(evt: EventStreamElement[DeletedUser.type]) =
 	{
 		log.info("从读边删除用户")
 		deleteUserPro.future.map(ps => List(ps.bind(evt.entityId)))
@@ -184,3 +158,4 @@ extends ReadSideProcessor[UserEvt]
 	private def getUDTValue(name: String) = session.underlying.map(_.getCluster.getMetadata.getKeyspace("user").getUserType(name).newValue)
 
 }
+

@@ -9,14 +9,14 @@ import com.lightbend.lagom.scaladsl.api.{Service, ServiceCall}
 	*/
 trait UserService extends Service
 {
-	def getUsers: ServiceCall[NotUsed, Seq[Info]]
-	def getUser(id: String): ServiceCall[NotUsed, Info]
-	def createUser: ServiceCall[Creation, Done]
+	def getUsers: ServiceCall[NotUsed, Seq[User]]
+	def getUser(id: String): ServiceCall[NotUsed, User]
+	def createUser: ServiceCall[CreateUser, Done]
 	def deleteUser(id: String): ServiceCall[NotUsed, Done]
-	def getAddresses(userId: String): ServiceCall[NotUsed, Map[String, AddressInfo]]
-	def getAddress(userId: String, id: String): ServiceCall[NotUsed, AddressInfo]
-	def createAddress(userId: String): ServiceCall[AddressCreation, Done]
-	def updateAddress(userId: String, id: String): ServiceCall[AddressInfo, Done]
+	def getAddresses(userId: String): ServiceCall[NotUsed, Map[String, Address]]
+	def getAddress(userId: String, id: String): ServiceCall[NotUsed, Address]
+	def createAddress(userId: String): ServiceCall[CreateAddress, Done]
+	def updateAddress(userId: String, id: String): ServiceCall[Address, Done]
 	def deleteAddress(userId: String, id: String): ServiceCall[NotUsed, Done]
 
 	import Service._
@@ -42,6 +42,3 @@ trait UserService extends Service
 		restCall(Method.DELETE, "/users/:userId/addresses/:id", deleteAddress _)
 	).withAutoAcl(true)
 }
-
-
-

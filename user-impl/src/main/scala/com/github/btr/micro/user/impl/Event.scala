@@ -1,11 +1,11 @@
 package com.github.btr.micro.user.impl
 
-import com.github.btr.micro.tool.JSONTool._
+import com.github.btr.micro.tool.JSONTool.singletonFormat
 import com.lightbend.lagom.scaladsl.persistence.{AggregateEvent, AggregateEventTag}
 import play.api.libs.json.{Format, Json}
 
 /**
-	* 用户事件
+	* 领域事件集
 	*/
 sealed trait UserEvt extends AggregateEvent[UserEvt]
 {
@@ -15,22 +15,22 @@ sealed trait UserEvt extends AggregateEvent[UserEvt]
 object UserEvt
 {
 	//按事件数分片
-	val numberShared = 3
+	val numberShared = 5
 	val tag          = AggregateEventTag.sharded[UserEvt](numberShared)
 }
 
 //创建
-case class Created(cmd: Create) extends UserEvt
+case class CreatedUser(cmd: CreateUser) extends UserEvt
 
-object Created
+object CreatedUser
 {
-	implicit val format: Format[Created] = Json.format
+	implicit val format: Format[CreatedUser] = Json.format
 }
 
 //删除
-case object Deleted extends UserEvt
+case object DeletedUser extends UserEvt
 {
-	implicit val format: Format[Deleted.type] = singletonFormat(Deleted)
+	implicit val format: Format[DeletedUser.type] = singletonFormat(DeletedUser)
 }
 
 //创建用户收货地址
