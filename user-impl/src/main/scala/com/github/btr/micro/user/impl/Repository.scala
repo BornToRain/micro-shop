@@ -15,7 +15,7 @@ class UserRepository(session: CassandraSession)(implicit ex: ExecutionContext)
 	{
 		val name = d.getUDTValue("name")
 		val fullName = Name(name.getString("first_name"), name.getString("last_name"), Option(name.getString("en_name")))
-		val dd = d.getMap[String, Address]("addresses",TypeToken.of(classOf[String]),TypeToken.of(classOf[Address]))
+		val dd = d.getMap[String, Address]("addresses", TypeToken.of(classOf[String]), TypeToken.of(classOf[Address]))
 		println(dd)
 //		val addresses = d.getUDTValue("addresses")
 
@@ -23,4 +23,22 @@ class UserRepository(session: CassandraSession)(implicit ex: ExecutionContext)
 		User(d.getString("id"), d.getString("mobile"), Some(fullName), Some(d.getInt("age")), Map.empty, new DateTime(d.getTimestamp("create_time")),
 			new DateTime(d.getTimestamp("update_time")))
 	}))
+
+	//当前集群
+	private def getCluster = session.underlying.map(_.getCluster)
 }
+
+//class AddressCodec extends MappingCodec[String, Date]
+//{
+//
+//}
+
+//public class TimestampAsStringCodec extends MappingCodec<String, Date> {
+//	public TimestampAsStringCodec() { super(TypeCodec.timestamp(), String.class); }
+//
+//	@Override
+//	protected Date serialize(String value) { ... }
+//
+//	@Override
+//	protected String deserialize(Date value) { ... }
+//}
